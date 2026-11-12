@@ -39,7 +39,7 @@ public class Tree
     {
         Debug.Log("Entrando");
 
-        if (!Boundary.Contains(gameObject))
+        if (!Boundary.Contains(gameObject, _dimensions))
         {
             Debug.Log("Esta fuera de mis limites");
 
@@ -76,9 +76,11 @@ public class Tree
 
         float childWidth = Boundary.width * 0.5f;
         float childHeight = Boundary.height * 0.5f;
+        float childDepth = _dimensions == 3 ? Boundary.depth * 0.5f : 0.0f;
 
         float offsetX = childWidth * 0.5f;
         float offsetY = childHeight * 0.5f;
+        float offsetZ = childDepth * 0.5f;
 
         for (int i = 0; i < _childSize; i++)
         {
@@ -86,19 +88,25 @@ public class Tree
 
             childBoundary.x = Boundary.x + (offsetX * ChildDirections[i].x);
             childBoundary.y = Boundary.y + (offsetY * ChildDirections[i].y);
+            childBoundary.z = _dimensions == 3 ? Boundary.z + (offsetZ * ChildDirections[i].z) : 0.0f;
+
             childBoundary.width = childWidth;
             childBoundary.height = childHeight;
+            childBoundary.depth = childDepth;
 
             _children[i] = new Tree(_dimensions, childBoundary, _capacity);
         }
     }
-    
+
     public void DrawGizmos()
     {
         Gizmos.color = Color.green;
 
-        Vector3 center = new Vector3(Boundary.x, Boundary.y, 0.0f);
-        Vector3 size = new Vector3(Boundary.width, Boundary.height, 0.0f);
+        float zCenter = _dimensions == 3 ? Boundary.z : 0.0f;
+        float zSize = _dimensions == 3 ? Boundary.depth : 0.0f;
+
+        Vector3 center = new Vector3(Boundary.x, Boundary.y, zCenter);
+        Vector3 size = new Vector3(Boundary.width, Boundary.height, zSize);
 
         Gizmos.DrawWireCube(center, size);
 
