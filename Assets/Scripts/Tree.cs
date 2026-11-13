@@ -14,7 +14,7 @@ public class Tree
     private Tree[] _children;
 
     private bool _isDivided;
-    
+
     private static readonly Vector3[] ChildDirections = new Vector3[]
     {
         new Vector3(-1.0f, 1.0f, -1.0f), //arriba izquierda (atras) / octree y quadtree
@@ -48,25 +48,30 @@ public class Tree
             return;
         }
 
-        if (_objects.Count < _capacity)
+        if (_objects.Count < _capacity && !_isDivided)
         {
             Debug.Log("Agregando");
 
             _objects.Add(cube);
+            return;
         }
-        else
+
+        Debug.Log("Estoy lleno, se lo doy a mis hijos");
+
+        if (!_isDivided)
         {
-            Debug.Log("Estoy lleno, se lo doy a mis hijos");
+            Debug.Log("Dividiendome");
+            Subdivide();
 
-            if (!_isDivided)
-            {
-                Debug.Log("Dividiendome");
-                Subdivide();
-            }
-
-            for (int i = 0; i < _childSize; i++)
-                _children[i].Insert(cube);
+            for (int i = 0; i < _objects.Count; i++)
+              for (int j = 0; j < _childSize; j++)
+                 _children[j].Insert(_objects[i]);
+            
+            _objects.Clear();
         }
+
+        for (int i = 0; i < _childSize; i++)
+            _children[i].Insert(cube);
     }
 
     private void Subdivide()
@@ -119,8 +124,8 @@ public class Tree
                 cube.DrawRadius();
             }
         }
-        
-        if (_children != null)
+
+        if (_isDivided && _children != null)
         {
             for (int i = 0; i < _children.Length; i++)
             {
@@ -130,15 +135,21 @@ public class Tree
                 }
             }
         }
-        
+    }
+    
+    public void ResetCollisions()
+    {
+        for (int i = 0; i < _objects.Count; i++)
+        {
+            _objects[i].isCandidate = false;
+            _objects[i].isColliding = false;
+        }
+
         if (_isDivided && _children != null)
         {
             for (int i = 0; i < _children.Length; i++)
             {
-                if (_children[i] != null)
-                {
-                    _children[i].DrawGizmos();
-                }
+                _children[i]?.ResetCollisions();
             }
         }
     }
@@ -147,14 +158,24 @@ public class Tree
     {
         for (int i = 0; i < _objects.Count; i++)
         {
-            for (int j = 0; j < _objects.Count; j++)
+            for (int j = i + 1; j < _objects.Count; j++)
             {
-                if (CheckCollisionRadius(_objects[i], _objects[j]))
+                if (_objects[i].CheckCollisionRadius(_objects[j]))
                 {
+                    _objects[i].isCandidate = true;
+                    _objects[j].isCandidate = true;
+                    
+                    if (_objects[i].CheckCollisionAABB(_objects[j], _dimensions))
+                    {
+                        _objects[i].isColliding = true;
+                        _objects[j].isColliding = true;
+
+                        Debug.Log($"Effectiver AABB collision between {_objects[i]._cube.name} and {_objects[j]._cube.name}");
+                    }
                 }
             }
         }
-        
+
         if (_isDivided && _children != null)
         {
             for (int i = 0; i < _children.Length; i++)
@@ -163,10 +184,5 @@ public class Tree
                     _children[i].CheckAABB();
             }
         }
-    }
-    
-    private bool CheckCollisionRadius(Cube objectA, Cube objectB)
-    {
-        return true;
     }
 }

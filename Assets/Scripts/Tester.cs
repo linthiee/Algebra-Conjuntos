@@ -31,6 +31,9 @@ public class Tester : MonoBehaviour
     {
         if (_quadTree == null)
             return;
+        
+        _quadTree.ResetCollisions();
+        _quadTree.CheckAABB();
     }
 
     public void OnDrawGizmos()
