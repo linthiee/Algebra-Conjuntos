@@ -6,14 +6,15 @@ public class Tree
 {
     private readonly int _dimensions;
     private readonly int _capacity;
-    private readonly List<GameObject> _objects = new List<GameObject>();
+    private readonly List<Cube> _objects = new List<Cube>();
     public Rectangle Boundary { get; }
+    public IReadOnlyList<Cube> Cubes => _objects;
 
     private int _childSize;
     private Tree[] _children;
 
     private bool _isDivided;
-
+    
     private static readonly Vector3[] ChildDirections = new Vector3[]
     {
         new Vector3(-1.0f, 1.0f, -1.0f), //arriba izquierda (atras) / octree y quadtree
@@ -35,22 +36,23 @@ public class Tree
         _isDivided = false;
     }
 
-    public void Insert(GameObject gameObject)
+
+    public void Insert(Cube cube)
     {
         Debug.Log("Entrando");
 
-        if (!Boundary.Contains(gameObject, _dimensions))
+        if (!Boundary.Contains(cube._cube, _dimensions))
         {
             Debug.Log("Esta fuera de mis limites");
 
             return;
         }
-        
+
         if (_objects.Count < _capacity)
         {
             Debug.Log("Agregando");
 
-            _objects.Add(gameObject);
+            _objects.Add(cube);
         }
         else
         {
@@ -63,7 +65,7 @@ public class Tree
             }
 
             for (int i = 0; i < _childSize; i++)
-                _children[i].Insert(gameObject);
+                _children[i].Insert(cube);
         }
     }
 
@@ -110,6 +112,14 @@ public class Tree
 
         Gizmos.DrawWireCube(center, size);
 
+        foreach (Cube cube in _objects)
+        {
+            if (cube != null)
+            {
+                cube.DrawRadius();
+            }
+        }
+        
         if (_children != null)
         {
             for (int i = 0; i < _children.Length; i++)
@@ -120,5 +130,43 @@ public class Tree
                 }
             }
         }
+        
+        if (_isDivided && _children != null)
+        {
+            for (int i = 0; i < _children.Length; i++)
+            {
+                if (_children[i] != null)
+                {
+                    _children[i].DrawGizmos();
+                }
+            }
+        }
+    }
+
+    public void CheckAABB()
+    {
+        for (int i = 0; i < _objects.Count; i++)
+        {
+            for (int j = 0; j < _objects.Count; j++)
+            {
+                if (CheckCollisionRadius(_objects[i], _objects[j]))
+                {
+                }
+            }
+        }
+        
+        if (_isDivided && _children != null)
+        {
+            for (int i = 0; i < _children.Length; i++)
+            {
+                if (_children[i] != null)
+                    _children[i].CheckAABB();
+            }
+        }
+    }
+    
+    private bool CheckCollisionRadius(Cube objectA, Cube objectB)
+    {
+        return true;
     }
 }
