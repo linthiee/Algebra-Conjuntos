@@ -170,7 +170,7 @@ public class Tree
                         _objects[i].isColliding = true;
                         _objects[j].isColliding = true;
 
-                        Debug.Log($"Effectiver AABB collision between {_objects[i]._cube.name} and {_objects[j]._cube.name}");
+                        Debug.Log($"Effectiver AABB collision between {_objects[i]._cube.name}  and {_objects[j]._cube.name}");
                     }
                 }
             }

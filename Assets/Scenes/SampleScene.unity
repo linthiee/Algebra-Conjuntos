@@ -461,7 +461,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5887dc7666bd5c949b63e3a0b82b2d24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tester
-  dimensions: 2
+  dimensions: 3
 --- !u!4 &1605378110
 Transform:
   m_ObjectHideFlags: 0
